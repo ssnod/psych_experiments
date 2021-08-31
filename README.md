@@ -1,2 +1,8 @@
 # psych_experiments
-This repository contains select experiments I ran while a graduate student in the LaRC lab at Binghamton University.
+This repository contains select experiments I conducted while a graduate student in the LaRC lab at Binghamton University.
+
+Each folder hosts the code and/or analysis scripts for a set of cognitive psychology experiments. The data are not posted but available upon request.
+
+**cat_building:** Individuals have the ability to spontaneously transfer germane knowledge to unfamiliar domains during problem solving tasks. This set of five experiments explored the predictions of a novel account of spontaneous analogical transfer&mdash;the category status hypothesis. As these experiments were conducted with paper-based materials, this folder only contains the corresponding analysis scripts. See the [OSF repository](https://osf.io/6hjgz/?view_only=d8b8f0eb3670415387d40f34ece437ae) for example materials. For further reading, see Snoddy and Kurtz (2021, *JEP:LMC*).
+
+**rel_xfer:** Relational categories and analogy are theoretically similar (if not identical) phenomena yet studied under different research traditions. In this project, we sought to bridge between research traditions by creating a novel experimental procedure for studying spontaneous analogical transfer using category learning tasks. Concretely, we used this novel procedure to test whether relational categories could be transferred to a novel domain to facilitate subsequent learning. Relatedly, we also explored the mnemonic consequences of acquiring a relational category and whether similar processes gave rise to both mnemonic and transfer effects. Experiment 1 was coded in Python and meant to be executed with the PsychoPy package whereas Experiment 2 was coded in JavaScript (local version posted). For further reading, see Snoddy and Kurtz (2020, 2021, *CogSci Proceedings*).
