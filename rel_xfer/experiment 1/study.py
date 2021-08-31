@@ -1,6 +1,6 @@
 # memory study phase script
 
-print '\n------RUNNING CLASSIFICATION------'
+print '\n------RUNNING STUDY------'
 print '------------------------------------\n'
 
 if condition == 1 or condition == 2 or condition == 3:
