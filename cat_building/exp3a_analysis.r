@@ -1,4 +1,4 @@
-#  cat_building - Experiment 3
+#  cat_building - Experiment 3b
 
 
 # write output of analysis to text file?
