@@ -1,4 +1,4 @@
-# transfer of relational categories - Experiment 1 init
+# transfer of relational categories - Experiment 1 first program init
 
 from psychopy import visual, event, core, gui
 from misc import *
