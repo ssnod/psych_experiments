@@ -7,8 +7,6 @@
 ## Create a "data" directory under the "analysis" directory to save aggregate data to
 ## Assumes a naming convention of "PC-experiment-condition-pnum.csv". If local machine name includes a dash, all file name indexing will need to be adjusted
 
-# load libraries
-
 # set directories
 home_dir <- getwd()
 setwd(".."); parent_dir <- getwd()
