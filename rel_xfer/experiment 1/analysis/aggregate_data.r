@@ -26,7 +26,7 @@ if(length(dupes > 0)){
 }
 
 # identify participants that need to be dropped 
-drop <- c(8061,9056) # participants that didn't finish
+drop <- c("8061.csv","9056.csv") # participants that didn't finish
 
 # seed data frames for appending subject data
 trainClass <- xferClass <- data.frame(id = numeric(), condition = numeric(), phase = character(),
