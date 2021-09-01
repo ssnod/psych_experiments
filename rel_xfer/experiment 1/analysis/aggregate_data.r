@@ -116,3 +116,5 @@ write.csv(xferClass, 'relx_xfer_class.csv', row.names = FALSE)
 write.csv(memStudy, 'relx_study_mem.csv', row.names = FALSE)
 write.csv(memTest, 'relx_recog_mem.csv', row.names = FALSE)
 write.csv(allClass, 'relx_combined_class.csv', row.names = FALSE)
+
+setwd(home_dir)
