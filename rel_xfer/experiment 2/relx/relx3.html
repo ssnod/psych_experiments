@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+
+        <!-- imports -->
+        <script src="static/utils.js"></script>
+        <script src='static/relx3/materials/ocanvas-2.10.0.js'></script>
+        <script src='static/relx3/instructions.js'></script>
+        <script src='static/relx3/obSi.js'></script>
+        <script src='static/relx3/obCo.js'></script>
+        <script src='static/relx3/clCo.js'></script>
+        <script src='static/relx3/classification.js'></script>
+        <script src='static/relx3/study.js'></script>
+        <script src='static/relx3/recognition.js'></script>
+
+        <!-- <link href="static/relx2/materials/styles.css" rel="stylesheet" type="text/css"></link> -->
+
+    </head>
+    
+    <!-- <body style = 'margin-bottom: 0px; margin-top: 0px; margin-left: 0px; margin-right: 0px;'> -->
+    <body style = 'background: rgba(228,216,232,1);'>
+        <div id='main'></div>
+
+        <script type="text/javascript">
+            window.onbeforeunload = function() { return "Are you sure you want to go back? Your data will not be saved"; } // <-- use this to warn users if they accidently hit the back button and delete all their data (its gunna save a lot of headaches)
+
+            expId = 'relx3'
+
+            subject = {
+                id: 1111,
+                condition: 1,
+                // 1 = Baseline; 2 = Obs Signle item; 3 = Obs Comp; 4 = Class Comp; 5 Obs Comp - hint xfer
+                results: {
+                    'trainPhase': [],
+                    'testPhase': [],
+                    'studyPhase': [],
+                    'recogPhase': [],
+                }
+            }
+
+
+            stim = {
+                1: [
+                    'static/relx3/materials/rocks/besod/b1.SVG',
+                    'static/relx3/materials/rocks/besod/b2.SVG',
+                    'static/relx3/materials/rocks/besod/b3.SVG',
+                    'static/relx3/materials/rocks/besod/b4.SVG',
+                    'static/relx3/materials/rocks/besod/b5.SVG',
+                    'static/relx3/materials/rocks/besod/b6.SVG',
+                    'static/relx3/materials/rocks/besod/b7.SVG',
+                    'static/relx3/materials/rocks/besod/b8.SVG',
+                    'static/relx3/materials/rocks/besod/b9.SVG',
+                    'static/relx3/materials/rocks/besod/b10.SVG',
+                    'static/relx3/materials/rocks/besod/b11.SVG',
+                    'static/relx3/materials/rocks/besod/b12.SVG',
+                    'static/relx3/materials/rocks/besod/b13.SVG',
+                    'static/relx3/materials/rocks/besod/b14.SVG',
+                    'static/relx3/materials/rocks/besod/b15.SVG',
+                    'static/relx3/materials/rocks/besod/b16.SVG',],
+                2:[ 
+                    'static/relx3/materials/rocks/makif/m1.SVG',
+                    'static/relx3/materials/rocks/makif/m2.SVG',
+                    'static/relx3/materials/rocks/makif/m3.SVG',
+                    'static/relx3/materials/rocks/makif/m4.SVG',
+                    'static/relx3/materials/rocks/makif/m5.SVG',
+                    'static/relx3/materials/rocks/makif/m6.SVG',
+                    'static/relx3/materials/rocks/makif/m7.SVG',
+                    'static/relx3/materials/rocks/makif/m8.SVG',
+                    'static/relx3/materials/rocks/makif/m9.SVG',
+                    'static/relx3/materials/rocks/makif/m10.SVG',
+                    'static/relx3/materials/rocks/makif/m11.SVG',
+                    'static/relx3/materials/rocks/makif/m12.SVG',
+                    'static/relx3/materials/rocks/makif/m13.SVG',
+                    'static/relx3/materials/rocks/makif/m14.SVG',
+                    'static/relx3/materials/rocks/makif/m15.SVG',
+                    'static/relx3/materials/rocks/makif/m16.SVG',],
+                3:[
+                    'static/relx3/materials/rocks/tolar/t1.SVG',
+                    'static/relx3/materials/rocks/tolar/t2.SVG',
+                    'static/relx3/materials/rocks/tolar/t3.SVG',
+                    'static/relx3/materials/rocks/tolar/t4.SVG',
+                    'static/relx3/materials/rocks/tolar/t5.SVG',
+                    'static/relx3/materials/rocks/tolar/t6.SVG',
+                    'static/relx3/materials/rocks/tolar/t7.SVG',
+                    'static/relx3/materials/rocks/tolar/t8.SVG',
+                    'static/relx3/materials/rocks/tolar/t9.SVG',
+                    'static/relx3/materials/rocks/tolar/t10.SVG',
+                    'static/relx3/materials/rocks/tolar/t11.SVG',
+                    'static/relx3/materials/rocks/tolar/t12.SVG',
+                    'static/relx3/materials/rocks/tolar/t13.SVG',
+                    'static/relx3/materials/rocks/tolar/t14.SVG',
+                    'static/relx3/materials/rocks/tolar/t15.SVG',
+                    'static/relx3/materials/rocks/tolar/t16.SVG',
+                ],
+            }
+
+            // partion items into phases
+            function shuffle(array) { // from mike bostok @ https://bost.ocks.org/mike/shuffle/
+                var m = array.length, t, i;
+
+                // While there remain elements to shuffle…
+                while (m) {
+
+                    // Pick a remaining element…
+                    i = Math.floor(Math.random() * m--);
+
+                    // And swap it with the current element.
+                    t = array[m];
+                    array[m] = array[i];
+                    array[i] = t;
+                }
+
+                return array;
+            
+            }
+
+            // Partition into ICL / recognition - study/test
+            var trainingStim = []
+            var testStim = []
+            var recognitionStim = []
+            var studyStim = []
+            for(category of [1,2,3]){
+                stim[category] = shuffle(stim[category])
+                trainingStim[category] = stim[category].slice(0, 8)
+                testStim[category] = stim[category].slice(0, 4)
+                recognitionStim[category] = stim[category].slice(8,16)
+                studyStim[category] = stim[category].slice(8,12)
+            }
+            trainingStim = trainingStim.flat()
+            testStim = testStim.flat()
+            studyStim = studyStim.flat()
+            recognitionStim = recognitionStim.flat()
+
+            classifyLabels = {
+                1: ['Besod','Besod','Besod','Besod','Besod','Besod','Besod','Besod','Makif','Makif','Makif','Makif','Makif','Makif','Makif','Makif','Tolar','Tolar','Tolar','Tolar','Tolar','Tolar','Tolar','Tolar'], }
+
+            testLabels = {
+                1: ['Besod','Besod','Besod','Besod','Makif','Makif','Makif','Makif','Tolar','Tolar','Tolar','Tolar'], }
+            
+            studyLabels = {
+                1: ['Next','Next','Next','Next','Next','Next','Next','Next','Next','Next','Next','Next'], }
+
+            recogLabels = {
+                1: ['old','old','old','old','new','new','new','new','old','old','old','old','new','new','new','new','old','old','old','old','new','new','new','new',], }
+
+            learningStructs = {
+            	2: ["<b>Learning Phase</b><br><br><br>Today, you will see pictures of rock arrangements created by the Ladua culture. The Ladua have names for three different types of rock arrangements that they build (Besods, Makifs, and Tolars). Your overall goal is to figure out what makes a given rock arrangement belong to one of the three categories: Besods, Makifs, or Tolars. You will be tested on your knowledge of each type later.<br><br> On each learning trial, you will see a rock arrangement. You will be shown the correct type for each arrangement to help you learn. At first you will not understand what makes them belong to a type, but before long you should become quite good at recognizing the different types.<br><br> Try your best to gain mastery of the names of each type and what makes an arrangement belong to those types!<br><br>Click the 'Next' button when you are ready to begin."], // Obs single
+                3: ["<b>Learning Phase</b><br><br><br>Today, you will see pictures of rock arrangements created by the Ladua culture. The Ladua have names for three different types of rock arrangements that they build (Besods, Makifs, and Tolars). Your overall goal is to figure out what makes a given rock arrangement belong to one of the three categories: Besods, Makifs, or Tolars. You will be tested on your knowledge of each type later.<br><br>On each learning trial, you will see 2 rock arrangements. You will be shown the correct type for each arrangement to help you learn. At first you will not understand what makes them belong to a type, but before long you should become quite good at recognizing the different types.<br><br> Try your best to gain mastery of the names of each type and what makes an arrangement belong to those types!<br><br>Click the 'Next' button when you are ready to begin."], // obs comp
+                4: ["<b>Learning Phase</b><br><br><br>Today, you will see pictures of rock arrangements created by the Ladua culture. The Ladua have names for three different types of rock arrangements that they build (Besods, Makifs, and Tolars). Your overall goal is to figure out what makes a given rock arrangement belong to one of the three categories: Besods, Makifs, or Tolars. You will be tested on your knowledge of each type later.<br><br>On each learning trial, you will see 2 rock arrangements. Try to figure out the correct type for each arrangement. Use the mouse to select your response. You will be given feedback at the end of each trial to help you learn. At first you will have to guess, but before long you should become quite good at recognizing the different types.<br><br> Try your best to gain mastery of the names of each type and what makes an arrangement belong to those types!<br><br>Click the 'Next' button when you are ready to begin."], // class comp
+            }
+             testStructs = {
+                1:["Now that you have had an opportunity to learn about the three different types of rock arrangements (Besod, Makif, and Tolar) we are going to test your knowlededge of the various types.<br><br>On each trial you will be shown one of the rock arrangements. Use the mouse to select your response. Feedback will not be provided after making a response. Try your best to accurately determine what type of arrangement each item demonstrates!<br><br>Click the 'Next' button when you are ready to begin."],
+            }
+            studyStructs = {
+            	1: ["<b>Memory Phase</b><br><br><br> In this part of the experiment, you will see a series of 12 items presented one at a time.  Your task is to study each item so that you can remember whether or not it was included in this <i>study set</i>. When you are finished studying each each item, you can proceed to the next one by clicking the 'Next' button on the screen. The entire series of 12 items will only be presented once, so make sure to study each item carefully before advancing to the next one. You will be tested on your ability to recognize these items later.<br><br>Click the 'Next' button when you are ready to begin."],
+            }
+
+            recogStructs = {
+            	1: ["<b>Test Phase</b><br><br><br> In the final phase of this experiment, you will be shown a series of items presented one at a time.  For each item, you will be asked to answer whether or not the item was one of the items that you just studied in the <i>study set</i> of the memory phase.<br><br>Selecting 'Yes' means that you remember seeing the item in the study set, while selecting 'No' means that you do not remember seeing the item in the study set.<br><br>Click the 'Next' button when you are ready to begin."],
+            }
+
+//create different train_params fxns for specific condition vars (e.g., counterbalancing labels and stuff)
+            if(subject['condition'] == 2){// obs single item
+	            train_params = {
+	                'objects': trainingStim,
+	                'labels': classifyLabels[1],
+                    'categories': ['Next'],
+                    'btnLabels': {'Next': 'Next'},
+	                'n_blocks': 3, //4
+	                'results': subject['results']['trainPhase'],
+	                //supervised or unsup classication
+	                'feedback': false,
+	            }
+
+                test_params = {
+                    'objects': testStim,
+                    'labels': testLabels[1],
+                    'categories':['Besod', 'Makif', 'Tolar'],
+                    'btnLabels': {'Besod': 'Besod', 'Makif': 'Makif', 'Tolar':'Tolar'},
+                    'n_blocks': 1, //4
+                    'results': subject['results']['testPhase'],
+                    //supervised or unsup classication
+                    'feedback': false,
+                }
+
+	        }else if(subject['condition'] == 3 || subject['condition'] == 5){// obs comp
+                train_params = {
+                    'objects': trainingStim,
+                    'labels': classifyLabels[1],
+                    'categories': ['Next'],
+                    'btnLabels': {'Next': 'Next'},
+                    'n_blocks': 3, //4
+                    'results': subject['results']['trainPhase'],
+                    //supervised or unsup classication
+                    'feedback': false,
+                }
+
+                test_params = {
+                    'objects': testStim,
+                    'labels': testLabels[1],
+                    'categories':['Besod', 'Makif', 'Tolar'],
+                    'btnLabels': {'Besod': 'Besod', 'Makif': 'Makif', 'Tolar':'Tolar'},
+                    'n_blocks': 1, //4
+                    'results': subject['results']['testPhase'],
+                    //supervised or unsup classication
+                    'feedback': false,
+                }
+
+            }else if(subject['condition'] == 4){//class comp
+                train_params = {
+                    'objects': trainingStim,
+                    'labels': classifyLabels[1],
+                    'categories':['Besod', 'Makif', 'Tolar'],
+                    'btnLabels': {'Besod': 'Besod', 'Makif': 'Makif', 'Tolar':'Tolar'},
+                    'n_blocks': 3,//4 
+                    'results': subject['results']['trainPhase'],
+                    //supervised or unsup classication
+                    'feedback': true,
+                }
+
+                test_params = {
+                    'objects': testStim,
+                    'labels': testLabels[1],
+                    'categories':['Besod', 'Makif', 'Tolar'],
+                    'btnLabels': {'Besod': 'Besod', 'Makif': 'Makif', 'Tolar':'Tolar'},
+                    'n_blocks': 1, //4
+                    'results': subject['results']['testPhase'],
+                    //supervised or unsup classication
+                    'feedback': false,
+                }
+
+            }
+
+	        study_params = {
+        		'objects': studyStim,
+                'labels': studyLabels[1],
+                'categories': ['Next'],
+                'btnLabels': {'Next': 'Next'},
+                'n_blocks': 1, 
+                'results': subject['results']['studyPhase'],
+                //supervised or unsup classication
+                'feedback': false,
+	        }
+
+	        recog_params = {
+        		'objects': recognitionStim,
+                'labels': recogLabels[1],
+                'categories': ['old','new'],
+                'btnLabels': {'old': 'Yes', 'new': 'No'},
+                'n_blocks': 1, 
+                'results': subject['results']['recogPhase'],
+                //supervised or unsup classication
+                'feedback': false,
+	        }
+
+            /** - - - Run Experiment via an Event Object - - - **/
+            eventGraph = {
+
+                instructionsSi: function () {
+                    instructions.start(
+                        {text: learningStructs[2]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.obSi()
+                        }, 100)}
+                    )
+                },
+
+                instructionsObCo: function () {
+                    instructions.start(
+                        {text: learningStructs[3]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.obCo()
+                        }, 100)}
+                    )
+                },
+
+                instructionsClCo: function () {
+                    instructions.start(
+                        {text: learningStructs[4]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.clCo()
+                        }, 100)}
+                    )
+                },
+
+                instructionsClassify: function () {
+                    instructions.start(
+                        {text: learningStructs[3]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.training()
+                        }, 100)}
+                    )
+                },
+                
+                instructionsTest: function(){
+                    instructions.start(
+                        {text: testStructs[1]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.classification()
+                        }, 100)}
+                    )
+                },
+
+                instructionsStudy: function () {
+                    instructions.start(
+                        {text: studyStructs[1]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.study()
+                        }, 100)}
+                    )
+                },
+
+                instructionsRecog: function () {
+                    instructions.start(
+                        {text: recogStructs[1]}, // params
+                        function () { setTimeout(function () { // what to do next
+                            eventGraph.recog()
+                        }, 100)}
+                    )
+                },
+
+              
+                obSi: function () {
+                    obSi.start(
+                        train_params, // params
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.instructionsTest()
+                        },500)}
+                    )
+                },
+
+                obCo: function () {
+                    obCo.start(
+                        train_params, // params
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.instructionsTest()
+                        },500)}
+                    )
+                },
+
+                clCo: function () {
+                    clCo.start(
+                        train_params, // params
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.instructionsTest()
+                        },500)}
+                    )
+                },
+                
+                //test 
+                classification: function(){
+                    classification.start(
+                        test_params,
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.instructionsStudy()
+                        },500)}
+                    )
+                    
+                },
+
+                study: function () {
+                    study.start(
+                        study_params, // params
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.instructionsRecog()
+                        },500)}
+                    )
+                },
+
+                recog: function () {
+                    recognition.start(
+                        recog_params, // params
+                        function () { setTimeout( function () { // what to do next
+                            eventGraph.end()
+                        },500)}
+                    )
+                },
+
+                end: function () {
+                    instructions.start({text:"Thank you for participating in this experiment! Click the 'Next' button to start the next experiment in this session."}, function () {
+                        window.onbeforeunload = false
+                        next(expId, subject['id'], subject['condition'], subject) // <-- send data to server and start next experiment | this comes from the "utils.js" script
+                    })
+                },
+            }
+
+            // initialize first event
+            if(subject['condition'] == 2){
+            	eventGraph.instructionsSi()
+            }else if(subject['condition'] == 3 || subject['condition'] == 5){
+                eventGraph.instructionsObCo()
+            }else if(subject['condition'] == 4){
+                eventGraph.instructionsClCo()
+            }else{
+            	eventGraph.instructionsStudy()
+            }
+
+
+        </script>
+
+    </body>
+</html>
