@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+
+        <!-- imports -->
+        <script src="static/utils.js"></script>
+        <script src='static/trancl3/materials/ocanvas-2.10.0.js'></script>
+        <script src='static/trancl3/instructions.js'></script>
+        <script src='static/trancl3/spont_endorsement.js'></script>
+        <script src='static/trancl3/hint_endorsement.js'></script>
+
+        <!-- <link href="static/trancl2/materials/styles.css" rel="stylesheet" type="text/css"></link> -->
+        <style>
+            .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 50%;
+            }
+        </style>
+
+
+    </head>
+    
+    <!-- <body style = 'margin-bottom: 0px; margin-top: 0px; margin-left: 0px; margin-right: 0px;'> -->
+    <body style = 'background: rgba(245, 222, 166,0.5);'>
+        <div id='main'></div>
+
+        <script type="text/javascript">
+            window.onbeforeunload = function() { return "Are you sure you want to go back? Your data will not be saved"; } // <-- use this to warn users if they accidently hit the back button and delete all their data (its gunna save a lot of headaches)
+
+            expId = 'trancl3'
+
+            subject = {
+                id: get_subject_id(),
+                condition: get_condition(),
+                results: {
+                    'spontxferPhase': [],
+                    'hintxferPhase':[],
+                }
+            }
+
+            endorseStim = {
+
+                1: [
+                    'static/trancl3/materials/mobiles/Doppa/d1.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d2.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d3.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d4.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d5.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d6.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d7.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d8.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d9.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d10.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d11.SVG',
+                    'static/trancl3/materials/mobiles/Doppa/d12.SVG',
+                    ],
+                	
+                	2:[
+                    'static/trancl3/materials/mobiles/Wuggy/w1.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w2.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w3.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w4.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w5.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w6.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w7.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w8.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w9.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w10.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w11.SVG',
+                    'static/trancl3/materials/mobiles/Wuggy/w12.SVG',
+                    ],
+                	
+                	3:[
+                    'static/trancl3/materials/mobiles/Zibble/z1.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z2.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z3.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z4.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z5.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z6.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z7.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z8.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z9.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z10.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z11.SVG',
+                    'static/trancl3/materials/mobiles/Zibble/z12.SVG',
+                    ],
+               
+            }
+
+            function shuffle(array) { // from mike bostok @ https://bost.ocks.org/mike/shuffle/
+		        var m = array.length, t, i;
+
+		        // While there remain elements to shuffle…
+		        while (m) {
+
+		            // Pick a remaining element…
+		            i = Math.floor(Math.random() * m--);
+
+		            // And swap it with the current element.
+		            t = array[m];
+		            array[m] = array[i];
+		            array[i] = t;
+		        }
+
+		        return array;
+		    
+		    }
+
+		    // subset items 
+		    var tempStim = []
+		    for(category of [1,2,3]){
+		    	endorseStim[category] = shuffle(endorseStim[category])
+		    	tempStim[category] = endorseStim[category].slice(0,8)
+		    }
+		    endorseStim = tempStim.flat()
+
+            categoryLabels = {
+                1: ['Doppa','Doppa','Doppa','Doppa','Doppa','Doppa','Doppa','Doppa','Wuggy','Wuggy','Wuggy','Wuggy','Wuggy','Wuggy','Wuggy','Wuggy','Zibble','Zibble','Zibble','Zibble','Zibble','Zibble','Zibble','Zibble'],}
+
+            classifyStructs = {
+            	1: ["In this experiment, you will be shown items that belong to one of three categories: Doppa, Wuggy, and Zibble. On each trial, an item will be presented along with a category name (Doppa, Wuggy, or Zibble). For some trials the item will be presented with the name of the category it belongs to, while on other trials it will be presented with the name of a category that it does not belong to. Your task is to decide whether each item is labelled with the correct category name. To help you learn about the three categories, the correct category for each item will be shown after your decision is made. Your overall goal is to learn how to correctly identify which category each item belongs to. At first you will not know how to identify which category each item belongs to, but before long you should become quite good. Try your best to gain mastery of the Doppa, Wuggy, and Zibble categories!<br><br>Click the 'Next' button when you are ready to begin."],
+
+                2: ["Before you continue learning about the Doppa, Wuggy, and Zibble categories, here is a helpful <b>hint</b>: the categories of rock arrangements that you learned about in the previous experiment - Besod, Makif, and Tolar - will be helpful in learning the present categories. Think about how the Besod, Makif, and Tolar categories may be related to each item when making a decision. <br><br>Click the 'Next' button when you are ready to begin."],
+
+                3:["In this experiment, you will be shown items that belong to one of three categories: Doppa, Wuggy, and Zibble. On each trial, an item will be presented along with a category name (Doppa, Wuggy, or Zibble). For some trials the item will be presented with the name of the category it belongs to, while on other trials it will be presented with the name of a category that it does not belong to. Your task is to decide whether each item is labelled with the correct category name. To help you learn about the three categories, the correct category for each item will be shown after your decision is made. Your overall goal is to learn how to correctly identify which category each item belongs to.<br><br>To help you learn about the Doppa, Wuggy, and Zibble categories, here is a helpful <b>hint</b>: the categories of rock arrangements that you learned about in the previous experiment - Besod, Makif, and Tolar - will be helpful in learning the present categories. Think about how the Besod, Makif, and Tolar categories may be related to each item when making a decision. <br><br>Click the 'Next' button when you are ready to begin."],
+            }
+
+		classifyCategories = ['Yes', 'No']
+		classifyBtnLabels = {'Yes': 'Yes', 'No': 'No'}
+		
+
+//create different train_params fxns for specific condition vars (e.g., counterbalancing labels and stuff)
+			if(subject['condition'] == 1){
+	            params = {
+	                'objects': endorseStim,
+	                'labels': categoryLabels[1],
+	                'categories': classifyCategories,
+	                'btnLabels': classifyBtnLabels,
+	                'n_blocks': 6, // 8
+	                'results': subject['results']['spontxferPhase'],
+	                //supervised or unsup classication
+	                'feedback': true,
+	            }
+
+		        
+	            /** - - - Run Experiment via an Event Object - - - **/
+	            eventGraph = {
+	                instructionsClassify: function () {
+	                    instructions.start(
+	                        {text: classifyStructs[1]}, // params
+	                        function () { setTimeout(function () { // what to do next
+	                            eventGraph.training()
+	                        }, 100)}
+	                    )
+	                },
+	                           
+	                training: function () {
+	                    endorsement.start(
+	                        params, // params
+	                        function () { setTimeout( function () { // what to do next
+	                            eventGraph.end()
+	                        },500)}
+	                    )
+	                },
+
+	                end: function () {
+	                    instructions.start({text:"Thank you for participating in this experiment! Click the 'Next' button to start the next experiment in this session."}, function () {
+	                        //viewData(JSON.stringify(subject), 'Downloads/test.txt', 'text/plain') // <-- spits out the data if you want to look at ; this is whats going to get sent to the server // comment out to remove it
+							window.onbeforeunload = false
+	                        next(expId, subject['id'], subject['condition'], subject) // <-- send data to server and start next experiment | this comes from the "utils.js" script
+	                    })
+	                },
+	            }
+
+	            // initialize first event
+	           	eventGraph.instructionsClassify()
+	        }else if (subject['condition'] == 5){
+				params = {
+	                'objects': endorseStim,
+	                'labels': categoryLabels[1],
+	                'categories': classifyCategories,
+	                'btnLabels': classifyBtnLabels,
+	                'n_blocks': 6, // 8
+	                'results': subject['results']['hintxferPhase'],
+	                //supervised or unsup classication
+	                'feedback': true,
+	            }
+
+		        
+	            /** - - - Run Experiment via an Event Object - - - **/
+	            eventGraph = {
+	                instructionsClassify: function () {
+	                    instructions.start(
+	                        {text: classifyStructs[3]}, // params
+	                        function () { setTimeout(function () { // what to do next
+	                            eventGraph.training()
+	                        }, 100)}
+	                    )
+	                },
+	                           
+	                training: function () {
+	                    hEndorsement.start(
+	                        params, // params
+	                        function () { setTimeout( function () { // what to do next
+	                            eventGraph.end()
+	                        },500)}
+	                    )
+	                },
+
+	                end: function () {
+	                    instructions.start({text:"Thank you for participating in this experiment! Click the 'Next' button to start the next experiment in this session."}, function () {
+	                        viewData(JSON.stringify(subject), 'Downloads/test.txt', 'text/plain') // <-- spits out the data if you want to look at ; this is whats going to get sent to the server // comment out to remove it
+	                        
+	                        window.onbeforeunload = false
+	                        next(expId, subject['id'], subject['condition'], subject) // <-- send data to server and start next experiment | this comes from the "utils.js" script
+	                    })
+	                },
+	            }
+
+	            // initialize first event
+	           	eventGraph.instructionsClassify()
+	        }else{
+	            spont_params = {
+	                'objects': endorseStim,
+	                'labels': categoryLabels[1],
+	                'categories': classifyCategories,
+	                'btnLabels': classifyBtnLabels,
+	                'n_blocks': 3, // 4
+	                'results': subject['results']['spontxferPhase'],
+	                //supervised or unsup classication
+	                'feedback': true,
+	            }
+
+	            hint_params = {
+	                'objects': endorseStim,
+	                'labels': categoryLabels[1],
+	                'categories': classifyCategories,
+	                'btnLabels': classifyBtnLabels,
+	                'n_blocks': 3, // 4
+	                'results': subject['results']['hintxferPhase'],
+	                //supervised or unsup classication
+	                'feedback': true,
+	            }
+
+		        
+	            /** - - - Run Experiment via an Event Object - - - **/
+	            eventGraph = {
+	                instructionsClassify: function () {
+	                    instructions.start(
+	                        {text: classifyStructs[1]}, // params
+	                        function () { setTimeout(function () { // what to do next
+	                            eventGraph.training()
+	                        }, 100)}
+	                    )
+	                },
+	                           
+	                training: function () {
+	                    endorsement.start(
+	                        spont_params, // params
+	                        function () { setTimeout( function () { // what to do next
+	                            eventGraph.instructionsClassify2()
+	                        },500)}
+	                    )
+	                },
+
+	                instructionsClassify2: function () {
+	                    instructions.start(
+	                        {text: classifyStructs[2]}, // params
+	                        function () { setTimeout(function () { // what to do next
+	                            eventGraph.training2()
+	                        }, 100)}
+	                    )
+	                },
+
+	                training2: function () {
+	                    //hint_endorsement.start(
+	                    hEndorsement.start(
+	                        hint_params, // params
+	                        function () { setTimeout( function () { // what to do next
+	                            eventGraph.end()
+	                        },500)}
+	                    )
+	                },
+
+	                end: function () {
+	                    instructions.start({text:"Thank you for participating in this experiment! Click the 'Next' button to start the next experiment in this session."}, function () {
+	                        window.onbeforeunload = false
+	                        next(expId, subject['id'], subject['condition'], subject) // <-- send data to server and start next experiment | this comes from the "utils.js" script
+	                    })
+	                },
+	            }
+
+	            // initialize first event
+	           	eventGraph.instructionsClassify()
+	        }
+
+
+
+        </script>
+
+    </body>
+</html>
